@@ -106,8 +106,24 @@ public:
 			}
 			else
 			{
-				
-			}
+				if (elevators[i].getPeople() != 0)
+				{
+					if (counter[i] == 20)
+					{
+						elevators[i].exit();
+						counter[i] = 0;
+					}
+					else
+						counter[i]++;
+				}
+				else
+				{
+					for (auto j = tasks.begin(); j < tasks.end(); j++)
+					{
+						if (*j[4] == i)
+							elevators[i].task(*j[1]);
+					}
+				}
 		}
 	};
 };
