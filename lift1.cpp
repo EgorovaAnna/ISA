@@ -1,8 +1,6 @@
 #include <iostream>
 #include <cstdlib>
 #include <vector>
-#include <string>
-#include <fstream>
 #include <cmath>
 #include <time.h>
 
@@ -33,11 +31,9 @@ public:
 };
 class Elevator
 {
-	int currentLevel;
-	int nextLevel;
-	int currentPeople;
+	int currentLevel, nextLevel, currentPeople, maxPeople;
 public:
-	Elevator(int level, int max = 10)
+	Elevator(int level, int max = 4)
 	{
 		currentLevel = level;
 		nextLevel = level;
@@ -94,6 +90,7 @@ public:
 			elevators.push_back(Elevator(rand()%height));
 			counter.push_back(0);
 		}
+		t = 0;
 	};
 	void iteration()
 	{
@@ -126,49 +123,79 @@ public:
 				{
 					for (auto j = tasks.begin(); j < tasks.end(); j++)
 					{
-						if (*j[4] == i)
+						if ((*j)[3] == i)
 						{
-							if (*j[0] != 0)
+							if ((*j)[0] != -1)
 							{
-								elevators[i].task(*j[0]);
-								*j[0] = 0;
+								elevators[i].task((*j)[0]);
+								(*j)[0] = -1;
 							}
 							else
 							{
-								elevators[i].task(*j[1], *j[2]);
+								elevators[i].task((*j)[1], (*j)[2]);
 								tasks.erase(j);
 							}
 						}
 					}
 				}
+			}
 		}
 	};
 	void distribute()
 	{
-		int el = height*30, eln;
-		for (auto j = tasks.begin(); j < tasks.end(); j++)
+		int el = height*30, k, eln;
+		for (int i = 0; i < elevators.size(); i++)
 		{
-			if (*j[4] == -1)
+			t++;
+			if ((k = abs(elevators[i].getLevel() - tasks.back()[0])*10) < el)
 			{
-				for (int i = 0; i < elevators.size(); i++)
-				{
-					if (elevators[i].getLevel() != elevators[i].getNext())
-					{
-						if ((elevators[i].getLevel() - elevators[i].getNext())*(elevators[i].getLevel() - *j[0]) > 0 && elevators[i].getPeople() + *j[3] <= elevators[i].max())
-							if ((elevators[i].getLevel() - elevators[i].getNext())*(*j[0] - *j[1]) > 0 && (elevators[i].getLevel() - *j[0])*10 < el)
-								eln = i;
-					}
-				}
+				eln = i;
+				el = k;
+				if (k == 0)
+					break;
 			}
 		}
+		tasks.back().appoint(eln);
 	};
 	void newTask(Task nt)
 	{
 		tasks.push_back(nt);
+		cout << nt[0] << " " << nt[1] << '\n';
 		distribute();
+	};
+	void show()
+	{
+		for (int i = 0; i < elevators.size(); i++)
+			cout << elevators[i].getLevel() << "     ";
+		cout << '\n';
+	};
+	int getTime()
+	{
+		return t; 
+	};
+	bool allElevatorsStoped()
+	{
+		for (int i = 0; i < elevators.size(); i++)
+			if (tasks.size() != 0 || elevators[i].getLevel() != elevators[i].getNext() || counter[i] != 0)
+				return false;
+		return true;
 	};
 };
 
 int main()
 {
+	int i;
+	srand (time(NULL));
+	System sys(7, 50);
+	sys.show();
+	sys.newTask(Task(rand()%50, rand()%50));
+	sys.iteration();
+	while (!sys.allElevatorsStoped())
+	{
+		sys.iteration();
+		i++;
+		if (i%10 == 0)
+			sys.show();
+	}
+	cout << sys.getTime() << '\n';
 }
