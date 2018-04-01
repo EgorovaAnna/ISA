@@ -160,13 +160,13 @@ public:
 	void newTask(Task nt)
 	{
 		tasks.push_back(nt);
-		cout << nt[0] << " " << nt[1] << '\n';
+		cout << "new task added: from " << nt[0] << " level to " << nt[1] << " level" << '\n';
 		distribute();
 	};
 	void show()
 	{
 		for (int i = 0; i < elevators.size(); i++)
-			cout << elevators[i].getLevel() << "     ";
+			cout << elevators[i].getLevel() << (elevators[i].getLevel() < 10 ? " " : "") << "   |   ";
 		cout << '\n';
 	};
 	int getTime()
@@ -184,9 +184,14 @@ public:
 
 int main()
 {
-	int i;
+	int i, elevators = 7, levels = 50;
 	srand (time(NULL));
-	System sys(7, 50);
+	System sys(elevators, levels);
+	cout << '\n' << "Positions of elevators in the beginning:" << '\n';
+	for (i = 0; i < elevators; i++)
+		cout << i << "        ";
+	cout << '\n';
+	i = 0;
 	sys.show();
 	sys.newTask(Task(rand()%50, rand()%50));
 	sys.iteration();
@@ -197,5 +202,5 @@ int main()
 		if (i%10 == 0)
 			sys.show();
 	}
-	cout << sys.getTime() << '\n';
+	cout << "All movement and calculation took " << sys.getTime() << '\n';
 }
