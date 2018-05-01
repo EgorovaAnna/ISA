@@ -20,6 +20,7 @@ public:
 			if (currentLevel != task[0])
 				tasks.push_back(Task(currentLevel, task[0], 0, abs(currentLevel - task[0])*10));
 			tasks.push_back(Task(task[0], task[1], task[2], abs(currentLevel - task[0])*10 + 20 + abs(task[1] - task[0])*10));
+			this -> task(tasks[0][0], tasks[0][2]);
 		}
 		else
 		{
@@ -120,62 +121,6 @@ public:
 				}
 			}
 			recount();
-			/*vector<Task>::iterator j;
-			for (auto i = tasks.begin(); i < tasks.end() - 1; i++)
-			{
-				if (((*i)[0] - (*i)[1])*((*i)[0] - task[0]) > 0 && ((*i)[0] - (*i)[1])*(task[0] - task[1]) > 0)
-				{
-					if (abs((*i)[0] - (*i)[1]) > abs((*i)[0] - task[0])) 
-					{
-						if ((*i)[1] == task[0])
-						{
-							j = i + 1;
-							if (abs((*j)[1] - (*j)[0]) >= abs(task[1] - task[0]))
-								tasks.insert(i, Task(task[0], ))
-						}
-					}
-				}
-			}
-			iback = tasks.back()[1];
-			if (iback == nextLevel || tasks.empty())
-			{
-				if (currentLevel == nextLevel && currentPeople == 0)
-				{
-					if (currentLevel != task[0])
-						tasks.push_back(Task(currentLevel, task[0], 0));
-					tasks.push_back(Task(task[0], task[1], task[2]));
-				}
-				else
-				{
-					if ((currentLevel - nextLevel)*(currentLevel - task[0]) > 0 && abs(currentLevel - nextLevel) > abs(currentLevel - task[0]))
-					{
-						if (tasks.back()[1] == nextLevel)
-							tasks.erase(tasks.end() - 1);
-						if (abs(currentLevel - nextLevel) < abs(currentLevel - task[1]))
-						{
-							tasks.push_back(Task(task[0], nextLevel, currentPeople + task[2]));
-							tasks.push_back(Task(nextLevel, task[1], task[2]));
-							nextLevel = task[0];
-						}
-						else
-						{
-							tasks.push_back(Task(task[0], task[1], currentPeople + task[2]));
-							tasks.push_back(Task(task[1], nextLevel, currentPeople));
-							nextLevel = task[0];
-						}
-					}
-					else
-					{
-						tasks.push_back(Task(nextLevel, task[0], 0));
-						tasks.push_back(Task(task[0], task[1], task[2]));
-					}
-				}
-			}
-			else
-				cout << '\n' << "warning!!11" << '\n';*/
-			/*for (auto i = 0; i < tasks.size(); i++)
-							if (tasks[i][1] == nextLevel)
-								tasks.erase(&tasks[i]);*/
 		}
 	};
 	vector<Task> getTasks()
@@ -192,7 +137,8 @@ public:
 	{
 		if (currentLevel == tasks[0][1])
 			tasks.erase(tasks.begin());
-		task(tasks[0][1], tasks[0][2]);
+		if (!tasks.empty())
+			task(tasks[0][1], tasks[0][2]);
 	};
 	void changeLevel()
 	{
@@ -200,6 +146,8 @@ public:
 			currentLevel++;
 		else
 			currentLevel--;
+		if (!tasks.empty())
+			tasks[0][0] = currentLevel;
 	};
 	void reduce()
 	{
@@ -210,8 +158,8 @@ public:
 	{
 		for (auto i = tasks.begin() + 1; i < tasks.end(); i++)
 			(*i)[4] = (*(i - 1))[4] + abs((*i)[0] - (*i)[1])*10 + 20;
-		for (auto i = tasks.begin(); i < tasks.end(); i++)
-			cout << (*i)[0] << " -> " << (*i)[1] << "   " << (*i)[4] << '\n';
+		//for (auto i = tasks.begin(); i < tasks.end(); i++)
+		//	cout << (*i)[0] << " -> " << (*i)[1] << "   " << (*i)[4] << '\n';
 	};
 	int getLevel()
 	{
@@ -228,7 +176,12 @@ public:
 	void exit(int ep = 0)
 	{
 		if (ep = 0)
-			currentPeople = 0;
+		{
+			if (!tasks.empty())
+				currentPeople = tasks[0][2];
+			else
+				currentPeople = 0;
+		}
 		else
 			currentPeople = currentPeople - ep;
 	};
