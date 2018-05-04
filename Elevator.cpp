@@ -158,8 +158,6 @@ public:
 	{
 		for (auto i = tasks.begin() + 1; i < tasks.end(); i++)
 			(*i)[4] = (*(i - 1))[4] + abs((*i)[0] - (*i)[1])*10 + 20;
-		//for (auto i = tasks.begin(); i < tasks.end(); i++)
-		//	cout << (*i)[0] << " -> " << (*i)[1] << "   " << (*i)[4] << '\n';
 	};
 	int getLevel()
 	{

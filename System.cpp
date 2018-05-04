@@ -23,7 +23,6 @@ public:
 	{
 		t++;
 		vector<Task> itasks;
-		//cout << t << " it " << '\n';
 		for (int i = 0; i < elevators.size(); i++)
 		{
 			itasks = elevators[i].getTasks();
@@ -60,8 +59,8 @@ public:
 		vector<Task> itas;
 		for (int i = 0; i < elevators.size(); i++)
 		{
-			t++;
-			cout << i << " elev:  " << elevators[i].getLevel() << " -> ";
+			iteration();
+			cout << i << " elevator:  " << elevators[i].getLevel() << " -> ";
 			if ((itas = elevators[i].getTasks()).empty())
 			{
 				cout << elevators[i].getNext() << '\n';
@@ -77,7 +76,7 @@ public:
 			{
 				for (auto j = itas.begin(); j < itas.end(); j++)
 				{
-					cout << (*j)[1] << " -> ";
+					cout << (*j)[1] << ((j == itas.end() - 1) ? "" : " -> ");
 					if (tasks.back()[0] <= max((*j)[0], (*j)[1]) && tasks.back()[0] >= min((*j)[0], (*j)[1]) && ((*j)[0] - (*j)[1])*(tasks.back()[0] - tasks.back()[1]) >= 0 && !(j == itas.begin() && tasks.back()[0] == (*j)[0]))
 					{
 						k = abs((*j)[0] - tasks.back()[0]);
@@ -110,7 +109,7 @@ public:
 		tnumber++;
 		tasks.push_back(nt);
 		tasks.back().setNumber(tnumber);
-		cout << "added task #" << tnumber << ": from " << nt[0] << " level to " << nt[1] << " level" << '\n';
+		cout << "At moment " << t << " added task #" << tnumber << ": from " << nt[0] << " level to " << nt[1] << " level" << '\n';
 		distribute();
 	};
 	void show()

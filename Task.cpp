@@ -29,7 +29,7 @@ public:
 	void appoint(int el)
 	{
 		elevator = el;
-		cout << "task #" << tnumber << " appoint to elevator #" << elevator << '\n';
+		cout << "task #" << tnumber << " appoint to elevator #" << elevator << '\n' << '\n' << '\n';
 	};
 	void setNumber(int tn)
 	{
