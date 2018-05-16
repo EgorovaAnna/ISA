@@ -2,7 +2,7 @@
 
 int main()
 {
-	int i, count = 6, elevators = 7, levels = 50, p = 7, pn;
+	int i, count = 70, elevators = 7, levels = 50, p = 7, pn;
 	srand (time(NULL));
 	System sys(elevators, levels);
 	cout << '\n' << "Positions of elevators in the beginning:" << '\n';
@@ -13,7 +13,7 @@ int main()
 	sys.show();
 	sys.newTask(Task(rand()%50, rand()%50));
 	sys.iteration();
-	while (!sys.allElevatorsStoped() && i < 1000)
+	while (!sys.allElevatorsStoped())
 	{
 		sys.iteration();
 		i++;
