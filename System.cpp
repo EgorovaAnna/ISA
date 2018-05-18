@@ -26,31 +26,29 @@ public:
 		for (int i = 0; i < elevators.size(); i++)
 		{
 			itasks = elevators[i].getTasks();
-			elevators[i].reduce();
+			if (elevators[i].reduce() < 0)
+				counter[i] = 0;
 			if (elevators[i].getLevel() != elevators[i].getNext())
 			{
 				if (counter[i] == 10)
 				{
 					elevators[i].changeLevel();
 					counter[i] = 0;
-					//if (!itasks.empty())
-						//cout << i << "__" << itasks[0][4] << "     " << itasks[0][0] << "---" << itasks[0][1] << '\n';
 				}
 				else
-				{
 					counter[i]++;
-					//cout << counter[i] << "__" << itasks[0][4] << "     " << itasks[0][1] << "---" << itasks[0][2] << '\n';
-				}
 			}
 			else
 			{
 				if (!itasks.empty())
 				{
-					if (counter[i] == 20)
+					if (counter[i] == 20 || elevators[i].getCounter() == 0)
 					{
+						//cout << "exit " << i << '\n';
 						elevators[i].exit();
 						counter[i] = 0;
-						elevators[i].task();
+						elevators[i].task(true);
+						//elevators[i].recount();
 					}
 					else
 						counter[i]++;
@@ -60,17 +58,17 @@ public:
 	};
 	void distribute()
 	{
-		int el = height*30, k, eln, icur, inex, red = 0, flag = 0;
+		int el = height*30, k, eln, icur, inex, red = 0, flag = 0, tt = 0;
 		vector<Task> itas;
 		for (int i = 0; i < elevators.size(); i++)
 		{
 			red++;
 			iteration();
-			cout << i << " elevator:  " << elevators[i].getLevel() << " -> ";
-			//cout << i << " elevator:  " << elevators[i].getLevel();
+			tt++;
+			cout << i << " elevator:  " << elevators[i].getLevel();
 			if ((itas = elevators[i].getTasks()).empty())
 			{
-				cout << elevators[i].getNext() << '\n';
+				cout << '\n';
 				if ((k = abs(elevators[i].getLevel() - tasks.back()[0])*10) < el)
 				{
 					eln = i;
@@ -79,52 +77,50 @@ public:
 					if (k == 0)
 						break;
 				}
-				cout << " .k = " << k << '\n';
 			}
 			else
 			{
 				for (auto j = itas.begin(); j < itas.end(); j++)
 				{
 					iteration();
+					tt++;
 					red++;
-					cout << (*j)[1] << ((j == itas.end() - 1) ? "" : " -> ");
+					cout  << " -> " << (*j)[1];
 					if (tasks.back()[0] <= max((*j)[0], (*j)[1]) && tasks.back()[0] >= min((*j)[0], (*j)[1]) && ((*j)[0] - (*j)[1])*(tasks.back()[0] - tasks.back()[1]) >= 0 && !(j == itas.begin() && tasks.back()[0] == (*j)[0]))
 					{
 						iteration();
+						tt++;
 						red++;
 						if (j == itas.end() - 1 || (tasks.back()[1] <= max((*j)[0], (*j)[1]) && tasks.back()[1] >= min((*j)[0], (*j)[1])) ||  ((*(j + 1))[0] - (*(j + 1))[1])*(tasks.back()[0] - tasks.back()[1]) >= 0)
 						{
 							k = abs((*j)[0] - tasks.back()[0])*10;
 							if (j != itas.begin())
 								k += (*(j - 1))[4];
-							if (k < el)
+							if (k < el && k >10)
 							{
 								eln = i;
 								el = k;
-								cout << " k = " << k << '\n';
 								red = 0; flag = 1;
-								break;	
 							}
-							else
-								break;
+							break;
 						}				
 					}
 				}
-				if (el <= 10 + elevators.size())
-					break;
 				cout << '\n';
+				if (el <= 10 + elevators.size() && flag == 1)
+					break;
 				iteration();
+				tt++;
 				red++;
 				if (eln != i && (k = itas.back()[4] + abs(itas.back()[1] - tasks.back()[0])*10 + 20) < el)
 				{
 					eln = i;
 					el = k;
-					cout << " k = " << k << '\n';
 					red = 0; flag = 1;
 				}
 			}
 		}
-		tasks.back().appoint(eln);
+		tasks.back().appoint(eln, tt);
 		if (flag == 1)
 			el -= red;
 		elevators[eln].addTask(tasks.back(), el);
@@ -138,6 +134,19 @@ public:
 			tasks.back().setNumber(tnumber);
 			cout << "At moment " << t << " added task #" << tnumber << ": from " << nt[0] << " level to " << nt[1] << " level" << '\n';
 			distribute();
+		}
+	};
+	void newTasks(vector<Task> nt)
+	{
+		for (auto i = nt.begin(); i < nt.end(); i++)
+		{
+			if((*i)[0] != (*i)[1])
+			{
+				tnumber++;
+				cout << "At moment " << t << " added task #" << tnumber << ": from " << (*i)[0] << " level to " << (*i)[1] << " level" << '\n';
+			}
+			else
+				nt.erase(i);
 		}
 	};
 	void show()

@@ -26,10 +26,10 @@ public:
 			return elevator;
 		return tnumber;
 	};
-	void appoint(int el)
+	void appoint(int el, int t)
 	{
 		elevator = el;
-		cout << "task #" << tnumber << " appoint to elevator #" << elevator << '\n' << '\n' << '\n';
+		cout << "task #" << tnumber << " appoint to elevator #" << elevator << ", it takes " << t << " moments" << '\n' << '\n' << '\n';
 	};
 	void setNumber(int tn)
 	{
