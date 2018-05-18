@@ -15,12 +15,50 @@ public:
 	};
 	void addTask(Task task, int t = 0)
 	{
-		int icur, inex, inex2, ipeo, ipeo2, buf, flag = 0, er = 0, time = 0;
+		int icur, inex, inex2, ipeo, ipeo2, buf = 1, flag = 0, er = 0, time = 0;
 		vector<Task> nt;
 		auto place = tasks.begin();
-		if (currentLevel == task[0] && counter > 0)
+		if (currentLevel == task[0] && task[0] < 20)
+		{
 			counter = 20;
-		if (tasks.empty() || tasks.back()[4] < t)
+			if (!tasks.empty())
+				tasks[0][4] = 20;
+		}
+		if (!tasks.empty() && currentLevel == task[0] && t <= 20)
+		{
+			if (tasks[0][1] == task[0])
+			{
+				buf = tasks[0][4];
+				tasks[0][4] = 20;
+				recount();
+				t = 21;
+			}
+			else
+			{
+				if (abs(tasks[0][0] - tasks[0][1]) >= abs(tasks[0][0] - task[1]))
+				{
+					inex = tasks[0][1];
+					tasks.erase(tasks.begin());
+					tasks.insert(tasks.begin(), Task(currentLevel, currentLevel, currentPeople, 20));
+					tasks.insert(tasks.begin() + 1, Task(currentLevel, task[1], currentPeople + task[2], abs(currentLevel - task[1])*10 + 40));
+					if (task[1] != inex)
+						tasks.insert(tasks.begin() + 2, Task(task[1], inex, currentPeople));
+					t = 0;
+				}
+				else
+				{
+					inex = tasks[0][1];
+					tasks[0][2] += task[2];
+					tasks.insert(tasks.begin(), Task(currentLevel, currentLevel, currentPeople, 20));
+					recount();
+					task[0] = inex;
+					t = tasks[1][4]; 
+				}
+				this -> task();
+			}
+			buf = 0;
+		}
+		if (buf == 1 && (tasks.empty() || tasks.back()[4] < t))
 		{
 			if (tasks.empty())
 			{
@@ -30,201 +68,137 @@ public:
 			}
 			else
 			{
-				time = max(tasks.back()[4], 0);
-				if (tasks.back()[1] != task[0])
-					tasks.push_back(Task(tasks.back()[1], task[0], 0, time + abs(tasks.back()[1] - task[0])*10 + 20));
-				tasks.push_back(Task(task[0], task[1], task[2], time + abs(task[0] - task[1])*10 + 20));
+				if (tasks.size() == 1 && tasks.back()[0] == task[0])
+				{
+					counter = 20;
+					inex = tasks[0][1];
+					ipeo = tasks[0][2];
+					tasks.clear();
+					tasks.push_back(Task(currentLevel, currentLevel, ipeo, 20));
+					if (currentLevel != inex && abs(currentLevel - task[1]) >= abs(currentLevel - inex))
+					{
+						tasks.push_back(Task(currentLevel, inex, ipeo + task[2], 20 + abs(currentLevel - inex)*10));
+						if (inex != task[1])
+							tasks.push_back(Task(inex, task[1], task[2]));
+					}
+					if (abs(currentLevel - task[1]) < abs(currentLevel - inex))
+					{
+						tasks.push_back(Task(currentLevel, task[1], ipeo + task[2], 20 + abs(currentLevel - task[1])*10));
+						tasks.push_back(Task(task[1], inex, ipeo));
+					}
+					this -> task();
+				}
+				else
+				{
+					time = max(tasks.back()[4], 0);
+					if (tasks.back()[1] != task[0])
+						tasks.push_back(Task(tasks.back()[1], task[0], 0, time + abs(tasks.back()[1] - task[0])*10 + 20));
+					tasks.push_back(Task(task[0], task[1], task[2], time + abs(task[0] - task[1])*10 + 20));
+				}
 			}
 		}
 		else
 		{
 			if (t != 0)
 			{
-				/*if (tasks[0][4] >= t)
+				for (auto i = tasks.begin(); i < tasks.end(); i++)
 				{
-					icur = currentLevel;
-					inex = tasks[0][1];
-					if (tasks[0][1] != task[0])
+					if ((*i)[4] >= t && (task[0] >= min((*i)[0], (*i)[1]) && task[0] <= max((*i)[0], (*i)[1])))
 					{
-						buf = tasks[0][4];
-						er++;
-						nt.push_back(Task(currentLevel, task[0], currentPeople, abs(currentLevel - task[0])*10 - buf%10 + 20));
-						if (abs(task[0] - task[1]) <= abs(task[0] - inex))
-						{
-							nt.push_back(Task(task[0], task[1], currentPeople + task[2]));
-							if (task[1] != inex)
-								nt.push_back(Task(task[1], inex, currentPeople));
-						}
+						if (i != tasks.begin())
+							time = (*(i - 1))[4];
 						else
+							time = (*i)[4]%10;
+						if (time < 0 || task[0] == tasks[0][0])
+							time = 0;
+						place = i;
+						inex = (*i)[1];
+						inex2 = (*i)[0];
+						ipeo = (*i)[2];
+						if (i == tasks.end() - 1)
 						{
-							nt.push_back(Task(task[0], inex, currentPeople + task[2]));
-							if (tasks.size() > 2)
+							if (abs((*i)[0] - task[1]) >= abs((*i)[0] - inex))
 							{
-								inex2 = tasks[2][1];
-								ipeo2 = tasks[2][2];
-								if (abs(inex - task[1]) >= abs(inex - inex2))
-								{
-									while (abs(task[0] - task[1]) >= abs(task[0] - inex2) && er < tasks.size() - 1)
-									{
-										er++;
-										nt.push_back(Task(inex, inex2, ipeo2 + task[2]));
-										inex = inex2;
-										ipeo2 = tasks[er + 1][2];
-										inex2 = tasks[er + 1][1];
-									}
-									if (inex2 != task[1])
-										nt.push_back(Task(inex, task[1], ipeo2 + task[2]));
-									nt.push_back(Task(task[1], inex2, ipeo2));
-								}
-								else
-								{
-									er++;
-									nt.push_back(Task(inex, task[1], task[2] + ipeo2));
-									nt.push_back(Task(task[1], inex2, ipeo2));
-								}
-							}
-							else
-								nt.push_back(Task(inex, task[1], task[2]));
-						}
-					}
-					else
-					{
-						if (tasks.size() > 1)
-						{
-							place++;
-							inex2 = tasks[1][1];
-							ipeo2 = tasks[1][2];
-							er++;
-							if (abs(task[0] - task[1]) <= abs(task[0] - inex2))
-							{
-								nt.push_back(Task(task[0], task[1], ipeo2 + task[2]));
-								if (task[1] != inex2)
-									nt.push_back(Task(task[1], inex2, ipeo2));
-							}
-							else
-							{
-								if (tasks.size() > 2)
-								{
-									inex = tasks[2][1];
-									ipeo = tasks[2][2];
-									er++;
-									nt.push_back(Task(task[0], inex2, ipeo2 + task[2]));
-									nt.push_back(Task(inex2, task[1], task[2] + ipeo));
-									nt.push_back(Task(task[1], inex, ipeo));
-								}
-								else
-								{
-									nt.push_back(Task(task[0], inex2, ipeo2 + task[2]));
-									nt.push_back(Task(inex2, task[1], task[2]));
-								}
-							}
-						}
-						else
-						{
-							place++;
-							nt.push_back(Task(tasks[0][1], task[1], task[2]));
-						}
-					}
-				}
-				else
-				{*/
-					//for (auto i = tasks.begin() + 1; i < tasks.end(); i++)
-					for (auto i = tasks.begin(); i < tasks.end(); i++)
-					{
-						if ((*i)[4] >= t || (task[0] >= min((*i)[0], (*i)[1]) && task[0] <= max((*i)[0], (*i)[1])))
-						{
-							if (i != tasks.begin())
-								time = (*(i - 1))[4];
-							else
-								time = (*i)[4]%10;
-							if (time < 0 || task[0] == tasks[0][0])
-								time = 0;
-							place = i;
-							inex = (*i)[1];
-							inex2 = (*i)[0];
-							ipeo = (*i)[2];
-							if (i == tasks.end() - 1)
-							{
-								if (abs((*i)[0] - task[1]) >= abs((*i)[0] - inex))
-								{
-									er++;
-									if (inex2 != task[0] || i == tasks.begin())
-										nt.push_back(Task(inex2, task[0], ipeo, time + abs(inex2 - task[0])*10 + 20));
-									nt.push_back(Task(task[0], inex, ipeo + task[2]));
-									if (task[1] != inex)
-										nt.push_back(Task(inex, task[1], task[2]));
-								}
-								else
-								{
-									er++;
-									nt.push_back(Task(inex2, task[0], ipeo, time + abs(inex2 - task[0])*10 + 20));
-									nt.push_back(Task(task[0], task[1], ipeo + task[2]));
-									nt.push_back(Task(task[1], inex, ipeo));
-								}
-							}
-							else
-							{
-								inex2 = (*(i + 1))[1];
-								ipeo2 = (*(i + 1))[2];
-								buf = (*i)[0];
 								er++;
-								if (buf != task[0] || i == tasks.begin())
-									nt.push_back(Task(buf, task[0], ipeo, time + abs(buf - task[0])*10 + 20));
-								if (abs(task[0] - task[1]) >= abs(task[0] - inex))
+								if (inex2 != task[0] || i == tasks.begin())
+									nt.push_back(Task(inex2, task[0], ipeo, time + abs(inex2 - task[0])*10 + 20));
+								nt.push_back(Task(task[0], inex, ipeo + task[2]));
+								if (task[1] != inex)
+									nt.push_back(Task(inex, task[1], task[2]));
+							}
+							else
+							{
+								er++;
+								nt.push_back(Task(inex2, task[0], ipeo, time + abs(inex2 - task[0])*10 + 20));
+								nt.push_back(Task(task[0], task[1], ipeo + task[2]));
+								nt.push_back(Task(task[1], inex, ipeo));
+							}
+						}
+						else
+						{
+							inex2 = (*(i + 1))[1];
+							ipeo2 = (*(i + 1))[2];
+							buf = (*i)[0];
+							er++;
+							if (buf != task[0] || i == tasks.begin())
+								nt.push_back(Task(buf, task[0], ipeo, time + abs(buf - task[0])*10 + 20));
+							if (abs(task[0] - task[1]) >= abs(task[0] - inex))
+							{
+								buf = task[0];
+								if (inex != task[0])
+									nt.push_back(Task(buf, inex, ipeo + task[2]));
+								i++;
+								while (abs(task[0] - (*i)[1]) < abs(task[0] - task[1]) && i < tasks.end())
 								{
-									buf = task[0];
-									if (inex != task[0])
-										nt.push_back(Task(buf, inex, ipeo + task[2]));
+									buf = inex;
+									er++;
+									inex = (*i)[1];
+									ipeo = (*i)[2];
+									nt.push_back(Task(buf, inex, ipeo + task[2]));
 									i++;
-									while (abs(task[0] - (*i)[1]) < abs(task[0] - task[1]) && i < tasks.end())
+								}
+								if (inex != task[1])
+								{
+									nt.push_back(Task(inex, task[1], task[2] + ((i < tasks.end() - 1) ? 0 : (*(i + 1))[2])));
+									if (i < tasks.end())
 									{
-										buf = inex;
 										er++;
 										inex = (*i)[1];
 										ipeo = (*i)[2];
-										nt.push_back(Task(buf, inex, ipeo + task[2]));
-										i++;
+										nt.push_back(Task(task[1], inex, ipeo));
 									}
-									if (inex != task[1])
-									{
-										nt.push_back(Task(inex, task[1], task[2] + ((i < tasks.end() - 1) ? 0 : (*(i + 1))[2])));
-										if (i < tasks.end())
-										{
-											er++;
-											inex = (*i)[1];
-											ipeo = (*i)[2];
-											nt.push_back(Task(task[1], inex, ipeo));
-										}
-									}
-								}
-								else
-								{
-									nt.push_back(Task(task[0], task[1], ipeo + task[2]));
-									nt.push_back(Task(task[1], inex, ipeo));
 								}
 							}
-							break;
+							else
+							{
+								nt.push_back(Task(task[0], task[1], ipeo + task[2]));
+								nt.push_back(Task(task[1], inex, ipeo));
+							}
 						}
+						break;
 					}
-				//}
-			}
-			tasks.erase(place, place + er);
-			tasks.insert(place, nt.begin(), nt.end());
-			for (auto i = nt.begin(); i < nt.end(); i++)
-				cout << (*i)[0] << "_" << (*i)[1] << "; ";
-			cout << '\n';
-			for (auto i = tasks.begin(); i < tasks.end(); i++)
-			{
-				if (i > tasks.begin() && (*i)[0] != (*(i - 1))[1])
-				{
-					tasks.insert(i, Task((*(i - 1))[1], (*i)[1], (*i)[2]));
-					tasks.erase(i + 1);
 				}
-				cout << (*i)[0] << "__" << (*i)[1] << " = " << (*i)[4] << "; ";
+				tasks.erase(place, place + er);
+				tasks.insert(place, nt.begin(), nt.end());
+				for (auto i = tasks.begin(); i < tasks.end(); i++)
+				{
+					if (i > tasks.begin() && (*i)[0] != (*(i - 1))[1])
+					{
+						tasks.insert(i, Task((*(i - 1))[1], (*i)[1], (*i)[2]));
+						tasks.erase(i + 1);
+					}
+				}
 			}
-			cout << '\n';
 		}
+		for (auto i = tasks.begin(); i < tasks.end(); i++)
+			if (i > tasks.begin() && (*i)[0] != (*(i - 1))[1])
+			{
+				tasks.insert(i, Task((*(i - 1))[1], (*i)[1], (*i)[2]));
+				tasks.erase(i + 1);
+			}
 		recount();
+		if (nextLevel != tasks[0][1])
+			this -> task(tasks[0][1], tasks[0][2]);
 	};
 	vector<Task> getTasks()
 	{
@@ -268,42 +242,41 @@ public:
 			if (tasks[0][1] != nextLevel)
 				task();
 			else
-			{
 				if (currentLevel == nextLevel)
 				{
 					counter--;
 					if (counter < 0)
 					{
-						//tasks.erase(tasks.begin());
 						task(true);
 						recount();
-						//cout << 
+						counter = 0;
 						return -1;
 					}
 					if (counter == 19)
 						return -1;
 				}
-			}
 			for (auto i = tasks.begin(); i < tasks.end(); i++)
 			{
 				(*i)[4]--;
 				if ((*i)[4] < 20 && (*i)[0] != (*i)[1])
 					recount();
 				if ((*i)[4] < 0)
-				{
-					task();
-					if ((*i)[0] != (*i)[1] || i != tasks.begin())
-						cout << "??? " << (*i)[0] << "  --- " << (*i)[1] << '\n';
-				}
+					task(true);
 			}
 		}
 		return 0;
 	};
 	void recount()
 	{
+		int buf = 0;
+		tasks[0][0] = currentLevel;
 		if (tasks[0][0] != tasks[0][1])
 		{
-			tasks[0][4] = tasks[0][4]%10 + abs(tasks[0][0] - tasks[0][1])*10 + 20 - 10;
+			counter = 0;
+			if (tasks[0][4]%10 != 0)
+				buf = tasks[0][4]%10 - 10;
+			if (tasks[0][4] < abs(tasks[0][0] - tasks[0][1])*10)
+				tasks[0][4] = abs(tasks[0][0] - tasks[0][1])*10 + 20 + buf;
 		}
 		else
 			if (tasks[0][4] > 20)
@@ -315,10 +288,9 @@ public:
 			(*i)[4] = (*(i - 1))[4] + abs((*i)[0] - (*i)[1])*10 + 20;
 			if ((*i)[0] != (*(i - 1))[1])
 			{
-				cout << "WTF?!  " << (*i)[0] << "   " << (*(i - 1))[1] << '\n';
+				cout << "WTF?! " <<  (*(i - 1))[1] << "---" << (*(i))[0] << '\n';
 				tasks.erase(i);
 				recount();
-				cout << '\n';
 			}
 		}
 	};

@@ -3,6 +3,7 @@
 #include <vector>
 #include <cmath>
 #include <time.h>
+#include <algorithm>
 
 using namespace std;
 
@@ -29,10 +30,14 @@ public:
 	void appoint(int el, int t)
 	{
 		elevator = el;
-		cout << "task #" << tnumber << " appoint to elevator #" << elevator << ", it takes " << t << " moments" << '\n' << '\n' << '\n';
+		cout << "task #" << tnumber << " appoint to elevator #" << elevator + 1 << ", it taked " << t << " moments" << '\n' << '\n' << '\n';
 	};
 	void setNumber(int tn)
 	{
 		tnumber = tn;
+	};
+	bool operator()(Task &a, Task &b)
+	{
+		return a[0] > b[0];
 	};
 };
